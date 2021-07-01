@@ -1,0 +1,109 @@
+<html>
+<style>
+    h1,
+    h2 {
+        text-align: center;
+    }
+
+    label {
+        display: block;
+        width: 10em;
+        float: left;
+        text-align: right;
+        padding-right: 5px;
+    }
+
+    input {
+        display: block;
+    }
+</style>
+
+<head>
+
+    <script>
+
+        const Joi = require('joi');
+
+        const schema = Joi.object({
+            username: Joi.string()
+                .alphanum()
+                .min(3)
+                .max(30)
+                .required(),
+
+            password: Joi.string()
+                .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+
+            repeat_password: Joi.ref('password'),
+
+            access_token: [
+                Joi.string(),
+                Joi.number()
+            ],
+
+            birth_year: Joi.number()
+                .integer()
+                .min(1900)
+                .max(2013),
+
+            email: Joi.string()
+                .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
+        })
+            .with('username', 'birth_year')
+            .xor('password', 'access_token')
+            .with('password', 'repeat_password');
+
+
+        schema.validate({ username: 'abc', birth_year: 1994 });
+        // -> { value: { username: 'abc', birth_year: 1994 } }
+
+        schema.validate({});
+        // -> { value: {}, error: '"username" is required' }
+
+        // Also -
+
+        try {
+            const value = await schema.validateAsync({ username: 'abc', birth_year: 1994 });
+        }
+        catch (err) { }
+        
+        const { error, value } = schema.validate({ a: 'a string' });
+        
+    </script>
+
+    <h1>Formulario</h1>
+
+</head>
+
+<body>
+    <form action="/action_page.php">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" name="nombre">
+        <br>
+        <label for="apell1">Primer Apellido</label>
+        <input type="text" id="apell1" name="apell1">
+        <br>
+        <label for="apell2">Segundo Apellido</label>
+        <input type="text" id="apell2" name="apell2">
+        <br>
+        <label for="domicilio">Domicilio</label>
+        <input type="text" id="domicilio" name="domicilio">
+        <br>
+        <label for="codPostal">Código Postal</label>
+        <input type="number" id="codPostal" name="codPostal">
+        <br>
+        <label for="tel">Teléfono</label>
+        <input type="tel" id="tel" name="tel">
+        <br>
+        <label for="mail">e-mail</label>
+        <input type="email" id="mail" name="mail">
+        <br>
+        <label for="e-mail">Confirmar</label>
+        <input type="email" id="email" name="email">
+        <br><br>
+        <input type="submit" value="Submit" style="align-self: center;">
+        <input type="reset" value="Borrar">
+    </form>
+</body>
+
+</html>
